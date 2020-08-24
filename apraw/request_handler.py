@@ -66,8 +66,7 @@ class RequestHandler:
                 self.queue.append(id_)
 
                 if self.user.ratelimit_remaining < 1:
-                    execution_time = self.user.ratelimit_reset + \
-                                     timedelta(seconds=len(self.queue))
+                    execution_time = self.user.ratelimit_reset + timedelta(seconds=len(self.queue))
                     wait_time = (execution_time - datetime.now()).total_seconds()
                     await asyncio.sleep(wait_time)
 
