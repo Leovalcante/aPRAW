@@ -1,7 +1,7 @@
 """List of Reddit API endpoints known to aPRAW."""
 from typing import Dict
 
-BASE_URL = "https://oauth.reddit.com{}?{}"
+BASE_URL = "https://oauth.reddit.com{}"
 
 API_PATH: Dict[str, str] = {
     "comment"                     : "/r/{sub}/comments/{submission}/_/{id}",
