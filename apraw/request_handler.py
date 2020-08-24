@@ -41,7 +41,7 @@ class RequestHandler:
                     raise Exception("Invalid user data.")
 
         return {
-            "Authorization": "{} {}".format(self.user.access_data.get("token_type"), self.user.access_data.get("access_token")),
+            "Authorization": f"{self.user.access_data.get('token_type')} {self.user.access_data.get('access_token')}",
             "User-Agent": self.user.user_agent
         }
 
@@ -81,7 +81,7 @@ class RequestHandler:
     @Decorators.check_ratelimit
     async def get(self, endpoint: Optional[str] = "", _url: Optional[str] = "", **kwargs) -> Any:
         kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
-        params = ["{}={}".format(k, kwargs[k]) for k in kwargs]
+        params = [f"{k}={kwargs[k]}" for k in kwargs]
 
         if endpoint:
             url = BASE_URL.format(endpoint, "&".join(params))
@@ -101,7 +101,7 @@ class RequestHandler:
     @Decorators.check_ratelimit
     async def delete(self, endpoint: str = "", **kwargs) -> Any:
         kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
-        params = ["{}={}".format(k, kwargs[k]) for k in kwargs]
+        params = [f"{k}={kwargs[k]}" for k in kwargs]
 
         url = BASE_URL.format(endpoint, "&".join(params))
 
@@ -116,7 +116,7 @@ class RequestHandler:
     @Decorators.check_ratelimit
     async def put(self, endpoint: str = "", data: Dict = None, **kwargs) -> Any:
         kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
-        params = ["{}={}".format(k, kwargs[k]) for k in kwargs]
+        params = [f"{k}={kwargs[k]}" for k in kwargs]
 
         url = BASE_URL.format(endpoint, "&".join(params))
 
@@ -131,12 +131,12 @@ class RequestHandler:
     @Decorators.check_ratelimit
     async def post(self, endpoint: str = "", url: str = "", data: Dict = None, **kwargs) -> Any:
         kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
-        params = ["{}={}".format(k, kwargs[k]) for k in kwargs]
+        params = [f"{k}={kwargs[k]}" for k in kwargs]
 
         if endpoint:
             url = BASE_URL.format(endpoint, "&".join(params))
         elif url:
-            url = "{}?{}".format(url, "&".join(params))
+            url = f"{url}?{'&'.join(params)}"
 
         headers = await self.get_request_headers()
         session = await self.user.client_session()
