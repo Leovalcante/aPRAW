@@ -83,17 +83,17 @@ class RequestHandler:
         elif not url:
             raise ValueError("One of endpoint or url must be specified.")
 
-        return self.request(method="get", url=url, **kwargs)
+        return await self.request(method="get", url=url, **kwargs)
 
     @Decorators.check_ratelimit
     async def delete(self, endpoint: str, **kwargs) -> Any:
         url = BASE_URL.format(endpoint)
-        return self.request(method="delete", url=url, **kwargs)
+        return await self.request(method="delete", url=url, **kwargs)
 
     @Decorators.check_ratelimit
     async def put(self, endpoint: str, data: Dict = None, **kwargs) -> Any:
         url = BASE_URL.format(endpoint)
-        return self.request(method="put", url=url, data=data, **kwargs)
+        return await self.request(method="put", url=url, data=data, **kwargs)
 
     @Decorators.check_ratelimit
     async def post(self, endpoint: str = "", url: str = "", data: Dict = None, **kwargs) -> Any:
@@ -102,7 +102,7 @@ class RequestHandler:
         elif not url:
             raise ValueError("One of endpoint or url must be specified.")
 
-        return self.request(method="post", url=url, data=data, **kwargs)
+        return await self.request(method="post", url=url, data=data, **kwargs)
 
     @Decorators.check_ratelimit
     async def request(self, method: str, url: str = "", data: Dict = None, **kwargs) -> Any:
