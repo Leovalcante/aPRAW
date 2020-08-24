@@ -57,7 +57,6 @@ class RequestHandler:
         await self.user.close()
 
     class Decorators:
-
         @classmethod
         def check_ratelimit(
                 cls, func: Callable[[Any, Any], Awaitable[Any]]) -> Callable[[Any, Any], Awaitable[Any]]:
@@ -79,69 +78,53 @@ class RequestHandler:
             return execute_request
 
     @Decorators.check_ratelimit
-    async def get(self, endpoint: Optional[str] = "", _url: Optional[str] = "", **kwargs) -> Any:
-        kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
-        params = [f"{k}={kwargs[k]}" for k in kwargs]
-
+    async def get(self, endpoint: Optional[str] = "", url: Optional[str] = "", **kwargs) -> Any:
         if endpoint:
-            url = BASE_URL.format(endpoint, "&".join(params))
-        elif _url:
-            url = _url + "?" + "&".join(params)
-        else:
-            raise ValueError("One of endpoint or _url must be specified.")
+            url = BASE_URL.format(endpoint)
+        elif not url:
+            raise ValueError("One of endpoint or url must be specified.")
 
-        headers = await self.get_request_headers()
-        session = await self.user.client_session()
-        resp = await session.get(url, headers=headers)
-
-        async with resp:
-            self.update(resp.headers)
-            return await resp.json()
+        return self.request(method="get", url=url, **kwargs)
 
     @Decorators.check_ratelimit
-    async def delete(self, endpoint: str = "", **kwargs) -> Any:
-        kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
-        params = [f"{k}={kwargs[k]}" for k in kwargs]
-
-        url = BASE_URL.format(endpoint, "&".join(params))
-
-        headers = await self.get_request_headers()
-        session = await self.user.client_session()
-        resp = await session.delete(url, headers=headers)
-
-        async with resp:
-            self.update(resp.headers)
-            return await resp.json()
+    async def delete(self, endpoint: str, **kwargs) -> Any:
+        url = BASE_URL.format(endpoint)
+        return self.request(method="delete", url=url, **kwargs)
 
     @Decorators.check_ratelimit
-    async def put(self, endpoint: str = "", data: Dict = None, **kwargs) -> Any:
-        kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
-        params = [f"{k}={kwargs[k]}" for k in kwargs]
-
-        url = BASE_URL.format(endpoint, "&".join(params))
-
-        headers = await self.get_request_headers()
-        session = await self.user.client_session()
-        resp = await session.delete(url, data=data, headers=headers)
-
-        async with resp:
-            self.update(resp.headers)
-            return await resp.json()
+    async def put(self, endpoint: str, data: Dict = None, **kwargs) -> Any:
+        url = BASE_URL.format(endpoint)
+        return self.request(method="put", url=url, data=data, **kwargs)
 
     @Decorators.check_ratelimit
     async def post(self, endpoint: str = "", url: str = "", data: Dict = None, **kwargs) -> Any:
+        if endpoint:
+            url = BASE_URL.format(endpoint)
+        elif not url:
+            raise ValueError("One of endpoint or url must be specified.")
+
+        return self.request(method="post", url=url, data=data, **kwargs)
+
+    @Decorators.check_ratelimit
+    async def request(self, method: str, url: str = "", data: Dict = None, **kwargs) -> Any:
+        # Build query arguments
         kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
         params = [f"{k}={kwargs[k]}" for k in kwargs]
 
-        if endpoint:
-            url = BASE_URL.format(endpoint, "&".join(params))
-        elif url:
-            url = f"{url}?{'&'.join(params)}"
+        # Update url
+        url += f"?{'&'.join(params)}"
 
+        # Get authorization header
         headers = await self.get_request_headers()
-        session = await self.user.client_session()
-        resp = await session.post(url, data=data, headers=headers)
 
+        # Get session
+        session = await self.user.client_session()
+
+        # Retrieve request function according to desire method
+        req = getattr(session, method)
+
+        # Fire the request and return data
+        resp = req(url, data=data, headers=headers)
         async with resp:
             self.update(resp.headers)
             return await resp.json()
