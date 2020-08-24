@@ -63,8 +63,8 @@ class RequestHandler:
                 cls, func: Callable[[Any, Any], Awaitable[Any]]) -> Callable[[Any, Any], Awaitable[Any]]:
             @wraps(func)
             async def execute_request(self, *args, **kwargs) -> Any:
-                id = datetime.now().strftime('%Y%m%d%H%M%S')
-                self.queue.append(id)
+                id_ = datetime.now().strftime('%Y%m%d%H%M%S')
+                self.queue.append(id_)
 
                 if self.user.ratelimit_remaining < 1:
                     execution_time = self.user.ratelimit_reset + \
@@ -73,7 +73,7 @@ class RequestHandler:
                     await asyncio.sleep(wait_time)
 
                 result = await func(self, *args, **kwargs)
-                self.queue.remove(id)
+                self.queue.remove(id_)
                 return result
 
             return execute_request
