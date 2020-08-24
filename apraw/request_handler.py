@@ -29,7 +29,12 @@ class RequestHandler:
 
             async with resp:
                 if resp.status == 200:
-                    self.user.access_data = await resp.json()
+                    response_data = await resp.json()
+                    # Check if response does not contains any error
+                    if response_data.get("error") is not None:
+                        raise Exception("Invalid user data.")
+
+                    self.user.access_data = response_data
                     self.user.token_expires = datetime.now(
                     ) + timedelta(seconds=self.user.access_data["expires_in"])
                 else:
