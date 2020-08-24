@@ -36,22 +36,22 @@ class RequestHandler:
 
                     self.user.access_data = response_data
                     self.user.token_expires = datetime.now(
-                    ) + timedelta(seconds=self.user.access_data["expires_in"])
+                    ) + timedelta(seconds=self.user.access_data.get("expires_in"))
                 else:
                     raise Exception("Invalid user data.")
 
         return {
-            "Authorization": "{} {}".format(self.user.access_data["token_type"], self.user.access_data["access_token"]),
+            "Authorization": "{} {}".format(self.user.access_data.get("token_type"), self.user.access_data.get("access_token")),
             "User-Agent": self.user.user_agent
         }
 
     def update(self, data: CIMultiDictProxy):
         if "x-ratelimit-remaining" in data:
-            self.user.ratelimit_remaining = int(float(data["x-ratelimit-remaining"]))
+            self.user.ratelimit_remaining = int(float(data.get("x-ratelimit-remaining")))
         if "x-ratelimit-used" in data:
-            self.user.ratelimit_used = int(data["x-ratelimit-used"])
+            self.user.ratelimit_used = int(data.get("x-ratelimit-used"))
         if "x-ratelimit-reset" in data:
-            self.user.ratelimit_reset = datetime.now() + timedelta(seconds=int(data["x-ratelimit-reset"]))
+            self.user.ratelimit_reset = datetime.now() + timedelta(seconds=int(data.get("x-ratelimit-reset")))
 
     async def close(self):
         await self.user.close()
