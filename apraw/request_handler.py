@@ -47,11 +47,11 @@ class RequestHandler:
 
     def update(self, data: CIMultiDictProxy):
         if "x-ratelimit-remaining" in data:
-            self.user.ratelimit_remaining = int(float(data.get("x-ratelimit-remaining")))
+            self.user.ratelimit_remaining = int(float(data["x-ratelimit-remaining"]))
         if "x-ratelimit-used" in data:
-            self.user.ratelimit_used = int(data.get("x-ratelimit-used"))
+            self.user.ratelimit_used = int(data["x-ratelimit-used"])
         if "x-ratelimit-reset" in data:
-            self.user.ratelimit_reset = datetime.now() + timedelta(seconds=int(data.get("x-ratelimit-reset")))
+            self.user.ratelimit_reset = datetime.now() + timedelta(seconds=int(data["x-ratelimit-reset"]))
 
     async def close(self):
         await self.user.close()
