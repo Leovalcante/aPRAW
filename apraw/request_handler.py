@@ -105,7 +105,7 @@ class RequestHandler:
         return await self.request(method="post", url=url, data=data, **kwargs)
 
     @Decorators.check_ratelimit
-    async def request(self, method: str, url: str = "", data: Dict = None, **kwargs) -> Any:
+    async def request(self, method: str, url: str, data: Dict = None, **kwargs) -> Any:
         # Build query arguments
         kwargs = {"raw_json": 1, "api_type": "json", **kwargs}
         params = [f"{k}={kwargs[k]}" for k in kwargs]
